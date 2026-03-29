@@ -207,13 +207,17 @@ const register = async (email, password, firstName, lastName, userAgent, ipAddre
     success: true,
   });
   
+  
+  // Send welcome email (non-blocking, don't block registration)
+  try {
+    const emailService = require('./emailService');
+    emailService.sendWelcomeEmail(email, firstName || 'there').catch(err => {
+      console.error('[Auth] Failed to send welcome email:', err.message);
+    });
+  } catch (err) {
+    console.error('[Auth] Email service not available:', err.message);
+  }
   return {
-
-  // Send welcome email (non-blocking)
-  const emailService = require('./emailService');
-  emailService.sendWelcomeEmail(email, firstName || 'there').catch(err => {
-    console.error('[Auth] Failed to send welcome email:', err.message);
-  });
     user: user.toJSON(),
     accessToken,
     refreshToken: refreshTokenData.token,
