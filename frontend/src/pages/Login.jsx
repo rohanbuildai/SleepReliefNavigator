@@ -42,12 +42,14 @@ const Login = () => {
       success('Welcome back!');
       navigate('/dashboard');
     } catch (err) {
-      const message = err.response?.data?.error?.message || 'Login failed';
+      const message = err.response?.data?.error?.message || err.message || 'Login failed';
       error(message);
-      if (message.includes('email')) {
-        setErrors({ email: message });
-      } else if (message.includes('password')) {
-        setErrors({ password: message });
+      if (message && typeof message === 'string') {
+        if (message.includes('email')) {
+          setErrors({ email: message });
+        } else if (message.includes('password')) {
+          setErrors({ password: message });
+        }
       }
     } finally {
       setLoading(false);

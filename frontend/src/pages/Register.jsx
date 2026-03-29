@@ -54,9 +54,9 @@ const Register = () => {
       success('Account created! Let\'s get your sleep plan.');
       navigate('/quiz');
     } catch (err) {
-      const message = err.response?.data?.error?.message || 'Registration failed';
+      const message = err.response?.data?.error?.message || err.message || 'Registration failed';
       error(message);
-      if (message.includes('email')) {
+      if (message && typeof message === 'string' && message.includes('email')) {
         setErrors({ email: message });
       }
     } finally {

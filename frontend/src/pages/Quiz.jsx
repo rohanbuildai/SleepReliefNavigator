@@ -137,12 +137,15 @@ const Quiz = () => {
 
   const handleOptionSelect = (questionId, value, isMulti) => {
     if (isMulti) {
-      setAnswers(prev => ({
-        ...prev,
-        [questionId]: prev[questionId].includes(value)
-          ? prev[questionId].filter(v => v !== value)
-          : [...prev[questionId], value],
-      }));
+      setAnswers(prev => {
+        const current = prev[questionId] || [];
+        return {
+          ...prev,
+          [questionId]: current.includes(value)
+            ? current.filter(v => v !== value)
+            : [...current, value],
+        };
+      });
     } else {
       setAnswers(prev => ({
         ...prev,

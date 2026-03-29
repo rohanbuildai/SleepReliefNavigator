@@ -46,8 +46,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // Update access token if returned in response (token refresh)
-    const newToken = response.headers['x-access-token'] || 
-                     response.headers['authorization']?.split(' ')[1];
+    const newToken = response.headers?.['x-access-token'] || 
+                     response.headers?.['authorization']?.split(' ')[1];
     if (newToken && newToken !== accessToken) {
       accessToken = newToken;
       setAuthToken(newToken);
@@ -58,7 +58,7 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Handle 401 errors - try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
@@ -69,15 +69,17 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
         
-        if (refreshResponse.data.success) {
-          const newToken = refreshResponse.data.data.accessToken;
+        if (refreshResponse.data?.success) {
+          const newToken = refreshResponse.data.data?.accessToken;
           
-          // Update stored token and retry original request
-          accessToken = newToken;
-          setAuthToken(newToken);
-          
-          originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-          return api(originalRequest);
+          if (newToken) {
+            // Update stored token and retry original request
+            accessToken = newToken;
+            setAuthToken(newToken);
+            
+            originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+            return api(originalRequest);
+          }
         }
       } catch (refreshError) {
         // Refresh failed - clear auth state and redirect to login
@@ -85,15 +87,20 @@ api.interceptors.response.use(
         setAuthToken(null);
         
         // Only redirect if we're not already on a public page
-        if (typeof window !== 'undefined' && !window.location.pathname.match(/^\/(login|register|quiz|pricing|library)/)) {
-          window.location.href = '/login';
+        if (typeof window !== 'undefined' && window.location.pathname) {
+          const publicPaths = /^\/(login|register|quiz|pricing|library|help-now|terms|privacy)/;
+          if (!publicPaths.test(window.location.pathname)) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(refreshError);
       }
     }
 
     // Handle 403 - redirect to login for protected routes
-    if (error.response?.status === 403 && originalRequest.url?.includes('/dashboard')) {
+    if (error.response?.status === 403 && originalRequest?.url && 
+        typeof originalRequest.url === 'string' && 
+        originalRequest.url.includes('/dashboard')) {
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
       }
