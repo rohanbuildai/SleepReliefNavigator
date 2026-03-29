@@ -1,11 +1,23 @@
 const config = require('../config');
 
 // Initialize Resend if API key is available
+console.log('[Email] Checking Resend config...');
+console.log('[Email] config.email:', JSON.stringify(config.email));
+console.log('[Email] process.env.RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
+console.log('[Email] process.env.RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***SET***' : 'NOT SET');
+console.log('[Email] process.env.EMAIL_FROM:', process.env.EMAIL_FROM || 'NOT SET');
+
 let resend = null;
-if (config.email?.apiKey && config.email.apiKey !== 're_your_resend_api_key' && config.email.apiKey !== 'your_resend_api_key') {
+const apiKey = config.email?.apiKey;
+const fromEmail = config.email?.from;
+
+console.log('[Email] apiKey from config:', apiKey ? '***SET***' : 'NOT SET');
+console.log('[Email] fromEmail from config:', fromEmail);
+
+if (apiKey && apiKey !== 're_your_resend_api_key' && apiKey !== 'your_resend_api_key') {
   try {
     const { Resend } = require('resend');
-    resend = new Resend(config.email.apiKey);
+    resend = new Resend(apiKey);
     console.log('[Email] Resend initialized successfully');
   } catch (error) {
     console.warn('[Email] Resend package not found. Email sending will be mocked.');
