@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
-    index: true,
+    // NOTE: Unique constraint creates an index, so no separate index needed
   },
   password: {
     type: String,

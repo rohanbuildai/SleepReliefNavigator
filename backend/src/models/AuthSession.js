@@ -46,7 +46,7 @@ const authSessionSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     required: true,
-    index: true,
+    // NOTE: TTL index is defined below with schema.index()
   },
   revokedAt: {
     type: Date,

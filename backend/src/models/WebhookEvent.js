@@ -5,17 +5,17 @@ const webhookEventSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    index: true,
+    // NOTE: unique creates index, no separate index needed
   },
   type: {
     type: String,
     required: true,
-    index: true,
+    // NOTE: compound index defined below
   },
   processed: {
     type: Boolean,
     default: false,
-    index: true,
+    // NOTE: compound index defined below
   },
   processedAt: Date,
   processingError: String,

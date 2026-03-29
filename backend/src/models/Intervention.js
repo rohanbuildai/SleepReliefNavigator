@@ -12,6 +12,7 @@ const interventionSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
+    // NOTE: unique creates index, no separate index needed
   },
   category: {
     type: String,

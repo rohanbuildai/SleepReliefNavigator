@@ -5,14 +5,14 @@ const paymentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true,
+    // NOTE: compound index defined below
   },
   // Stripe payment details
   stripePaymentIntentId: {
     type: String,
     unique: true,
     sparse: true,
-    index: true,
+    // NOTE: compound index defined below
   },
   stripeChargeId: {
     type: String,
