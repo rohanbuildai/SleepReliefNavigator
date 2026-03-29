@@ -1,50 +1,63 @@
+const nodemailer = require('nodemailer');
 const config = require('../config');
 
-// Initialize Resend if API key is available
-console.log('[Email] Checking Resend config...');
-console.log('[Email] config.email:', JSON.stringify(config.email));
-console.log('[Email] process.env.RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
-console.log('[Email] process.env.RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***SET***' : 'NOT SET');
-console.log('[Email] process.env.EMAIL_FROM:', process.env.EMAIL_FROM || 'NOT SET');
+// Create transporter based on configuration
+let transporter = null;
 
-let resend = null;
-const apiKey = config.email?.apiKey;
-const fromEmail = config.email?.from;
+const initTransporter = () => {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpSecure = process.env.SMTP_SECURE === 'true';
 
-console.log('[Email] apiKey from config:', apiKey ? '***SET***' : 'NOT SET');
-console.log('[Email] fromEmail from config:', fromEmail);
-
-if (apiKey && apiKey !== 're_your_resend_api_key' && apiKey !== 'your_resend_api_key') {
-  try {
-    const { Resend } = require('resend');
-    resend = new Resend(apiKey);
-    console.log('[Email] Resend initialized successfully');
-  } catch (error) {
-    console.warn('[Email] Resend package not found. Email sending will be mocked.');
+  if (smtpHost && smtpUser && smtpPass) {
+    transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort || 587,
+      secure: smtpSecure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+    console.log('[Email] Nodemailer SMTP transporter initialized');
+    return true;
   }
-} else {
-  console.log('[Email] No Resend API key configured. Emails will be mocked.');
-}
+  
+  // Fallback to Gmail SMTP for testing
+  if (process.env.GMAIL_USER && process.env.GMAIL_PASS) {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
+    });
+    console.log('[Email] Gmail SMTP transporter initialized');
+    return true;
+  }
 
-const FROM_EMAIL = config.email?.from || 'onboarding@resend.dev'; // Default to Resend test sender
+  console.log('[Email] No SMTP configuration found. Emails will be mocked.');
+  return false;
+};
+
+initTransporter();
+
 const FROM_NAME = config.email?.fromName || 'Sleep Relief Navigator';
-
-console.log('[Email] Config - API Key exists:', !!config.email?.apiKey);
-console.log('[Email] FROM_EMAIL:', FROM_EMAIL);
-console.log('[Email] FROM_NAME:', FROM_NAME);
 
 /**
  * Send welcome email to new users
  */
 const sendWelcomeEmail = async (email, firstName) => {
-  if (!resend) {
+  if (!transporter) {
     console.log('[Email Mock] Welcome email would be sent to:', email);
     return { success: true, mock: true };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${process.env.EMAIL_FROM || 'noreply@sleepreliefnavigator.com'}>`,
       to: email,
       subject: 'Welcome to Sleep Relief Navigator 🌙',
       html: `
@@ -81,8 +94,8 @@ const sendWelcomeEmail = async (email, firstName) => {
       `,
     });
 
-    if (error) throw error;
-    return { success: true, id: data.id };
+    console.log('[Email] Welcome email sent:', info.messageId);
+    return { success: true, id: info.messageId };
   } catch (error) {
     console.error('Failed to send welcome email:', error);
     return { success: false, error: error.message };
@@ -93,7 +106,7 @@ const sendWelcomeEmail = async (email, firstName) => {
  * Send email verification
  */
 const sendVerificationEmail = async (email, firstName, token) => {
-  if (!resend) {
+  if (!transporter) {
     console.log('[Email Mock] Verification email would be sent to:', email);
     return { success: true, mock: true };
   }
@@ -101,8 +114,8 @@ const sendVerificationEmail = async (email, firstName, token) => {
   const verifyUrl = `${config.app?.frontendUrl || 'http://localhost:5173'}/verify-email/${token}`;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${process.env.EMAIL_FROM || 'noreply@sleepreliefnavigator.com'}>`,
       to: email,
       subject: 'Verify your email address',
       html: `
@@ -114,7 +127,6 @@ const sendVerificationEmail = async (email, firstName, token) => {
             .container { max-width: 600px; margin: 0 auto; background: #0f172a; border-radius: 16px; padding: 32px; }
             .logo { font-size: 24px; font-weight: bold; color: #a78bfa; text-align: center; margin-bottom: 32px; }
             h1 { color: #ffffff; text-align: center; }
-            .code { background: #1e293b; padding: 24px; border-radius: 12px; text-align: center; font-size: 24px; letter-spacing: 4px; margin: 24px 0; }
             .button { display: block; width: 100%; background: #7c3aed; color: white; padding: 16px; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; margin-top: 24px; }
             .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #334155; color: #64748b; font-size: 12px; text-align: center; }
           </style>
@@ -134,8 +146,8 @@ const sendVerificationEmail = async (email, firstName, token) => {
       `,
     });
 
-    if (error) throw error;
-    return { success: true, id: data.id };
+    console.log('[Email] Verification email sent:', info.messageId);
+    return { success: true, id: info.messageId };
   } catch (error) {
     console.error('Failed to send verification email:', error);
     return { success: false, error: error.message };
@@ -146,7 +158,7 @@ const sendVerificationEmail = async (email, firstName, token) => {
  * Send password reset email
  */
 const sendPasswordResetEmail = async (email, firstName, token) => {
-  if (!resend) {
+  if (!transporter) {
     console.log('[Email Mock] Password reset email would be sent to:', email);
     return { success: true, mock: true };
   }
@@ -154,8 +166,8 @@ const sendPasswordResetEmail = async (email, firstName, token) => {
   const resetUrl = `${config.app?.frontendUrl || 'http://localhost:5173'}/reset-password/${token}`;
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${process.env.EMAIL_FROM || 'noreply@sleepreliefnavigator.com'}>`,
       to: email,
       subject: 'Reset your password',
       html: `
@@ -192,8 +204,8 @@ const sendPasswordResetEmail = async (email, firstName, token) => {
       `,
     });
 
-    if (error) throw error;
-    return { success: true, id: data.id };
+    console.log('[Email] Password reset email sent:', info.messageId);
+    return { success: true, id: info.messageId };
   } catch (error) {
     console.error('Failed to send password reset email:', error);
     return { success: false, error: error.message };
@@ -204,14 +216,14 @@ const sendPasswordResetEmail = async (email, firstName, token) => {
  * Send purchase confirmation
  */
 const sendPurchaseConfirmation = async (email, firstName, productName, amount) => {
-  if (!resend) {
+  if (!transporter) {
     console.log('[Email Mock] Purchase confirmation would be sent to:', email);
     return { success: true, mock: true };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${process.env.EMAIL_FROM || 'noreply@sleepreliefnavigator.com'}>`,
       to: email,
       subject: 'Purchase Confirmed - Your Sleep Plan',
       html: `
@@ -264,8 +276,8 @@ const sendPurchaseConfirmation = async (email, firstName, productName, amount) =
       `,
     });
 
-    if (error) throw error;
-    return { success: true, id: data.id };
+    console.log('[Email] Purchase confirmation sent:', info.messageId);
+    return { success: true, id: info.messageId };
   } catch (error) {
     console.error('Failed to send purchase confirmation:', error);
     return { success: false, error: error.message };
@@ -276,14 +288,14 @@ const sendPurchaseConfirmation = async (email, firstName, productName, amount) =
  * Send quiz completion summary
  */
 const sendQuizSummaryEmail = async (email, firstName, profileName, planUrl) => {
-  if (!resend) {
+  if (!transporter) {
     console.log('[Email Mock] Quiz summary would be sent to:', email);
     return { success: true, mock: true };
   }
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    const info = await transporter.sendMail({
+      from: `"${FROM_NAME}" <${process.env.EMAIL_FROM || 'noreply@sleepreliefnavigator.com'}>`,
       to: email,
       subject: 'Your Sleep Profile is Ready 🌙',
       html: `
@@ -320,8 +332,8 @@ const sendQuizSummaryEmail = async (email, firstName, profileName, planUrl) => {
       `,
     });
 
-    if (error) throw error;
-    return { success: true, id: data.id };
+    console.log('[Email] Quiz summary sent:', info.messageId);
+    return { success: true, id: info.messageId };
   } catch (error) {
     console.error('Failed to send quiz summary email:', error);
     return { success: false, error: error.message };
