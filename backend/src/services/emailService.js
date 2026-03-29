@@ -14,7 +14,7 @@ if (config.email?.apiKey && config.email.apiKey !== 're_your_resend_api_key' && 
   console.log('[Email] No Resend API key configured. Emails will be mocked.');
 }
 
-const FROM_EMAIL = config.email?.from || 'noreply@sleepreliefnavigator.com';
+const FROM_EMAIL = config.email?.from || 'onboarding@resend.dev'; // Default to Resend test sender
 const FROM_NAME = config.email?.fromName || 'Sleep Relief Navigator';
 
 /**
