@@ -208,6 +208,12 @@ const register = async (email, password, firstName, lastName, userAgent, ipAddre
   });
   
   return {
+
+  // Send welcome email (non-blocking)
+  const emailService = require('./emailService');
+  emailService.sendWelcomeEmail(email, firstName || 'there').catch(err => {
+    console.error('[Auth] Failed to send welcome email:', err.message);
+  });
     user: user.toJSON(),
     accessToken,
     refreshToken: refreshTokenData.token,
