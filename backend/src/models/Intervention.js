@@ -130,7 +130,7 @@ const interventionSchema = new mongoose.Schema({
 });
 
 // Indexes
-interventionSchema.index({ slug: 1 }, { unique: true });
+interventionSchema.index({ unique: true });
 interventionSchema.index({ category: 1, isActive: 1 });
 interventionSchema.index({ bestFor: 1 });
 

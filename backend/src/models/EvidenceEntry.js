@@ -109,7 +109,7 @@ const evidenceEntrySchema = new mongoose.Schema({
   timestamps: true,
 });
 
-evidenceEntrySchema.index({ slug: 1 }, { unique: true });
+evidenceEntrySchema.index({ unique: true });
 evidenceEntrySchema.index({ isActive: 1, sortOrder: 1 });
 evidenceEntrySchema.index({ keywords: 1 });
 

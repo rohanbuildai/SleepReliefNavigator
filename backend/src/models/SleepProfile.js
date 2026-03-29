@@ -74,7 +74,7 @@ const sleepProfileSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-sleepProfileSchema.index({ slug: 1 }, { unique: true });
+sleepProfileSchema.index({ unique: true });
 sleepProfileSchema.index({ category: 1, isActive: 1 });
 
 const SleepProfile = mongoose.model('SleepProfile', sleepProfileSchema);

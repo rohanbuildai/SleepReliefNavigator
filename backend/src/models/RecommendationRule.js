@@ -92,7 +92,7 @@ const recommendationRuleSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-recommendationRuleSchema.index({ slug: 1 }, { unique: true });
+recommendationRuleSchema.index({ unique: true });
 recommendationRuleSchema.index({ type: 1, isActive: 1 });
 recommendationRuleSchema.index({ applicableProfiles: 1 });
 

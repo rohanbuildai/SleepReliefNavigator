@@ -83,7 +83,7 @@ const subscriptionSchema = new mongoose.Schema({
 
 // Indexes
 subscriptionSchema.index({ userId: 1, status: 1 });
-subscriptionSchema.index({ stripeCustomerId: 1 });
+subscriptionSchema.index();
 subscriptionSchema.index({ currentPeriodEnd: 1 }); // For cron job to check renewals
 
 const Subscription = mongoose.model('Subscription', subscriptionSchema);
