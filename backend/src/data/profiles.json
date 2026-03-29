@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Racing Mind Sleep Onset",
+    "slug": "racing_mind",
+    "description": "Difficulty falling asleep due to persistent mental chatter, worries, or an active mind that won't quiet down.",
+    "symptoms": ["racing_thoughts", "cant_fall_asleep", "mind_wont_stop", "overthinking"],
+    "category": "onset",
+    "triggers": ["work_stress", "life_decisions", "health_anxiety", "daytime_caffeine"],
+    "prevalence": 35,
+    "warningSigns": ["spiraling_thoughts", "panic_attacks", "hours_without_sleep"],
+    "immediateAction": "Try the 4-7-8 breathing technique combined with cognitive unload journaling.",
+    "color": "#6366f1",
+    "icon": "brain",
+    "priority": 1
+  },
+  {
+    "name": "Middle-of-Night Adrenaline Wake",
+    "slug": "midnight_wake",
+    "description": "Waking up in the middle of the night with difficulty returning to sleep, often with a surge of alertness or anxiety.",
+    "symptoms": ["wake_up_cant_return", "midnight_anxiety", "3am_waking", "adrenaline_surge"],
+    "category": "early_wake",
+    "triggers": ["late_alcohol", "high_stress_day", "caffeine_late", "sleep_apnea"],
+    "prevalence": 25,
+    "warningSigns": ["snoring", "gasping", "woke_choking", "heart_pounding"],
+    "immediateAction": "Use stimulus control - get out of bed if awake >20 minutes and do something calming until drowsy.",
+    "color": "#8b5cf6",
+    "icon": "moon",
+    "priority": 2
+  },
+  {
+    "name": "Tired But Wired Hyperarousal",
+    "slug": "tired_wired",
+    "description": "Physically exhausted but mentally alert, unable to transition to sleep despite fatigue.",
+    "symptoms": ["tired_but_wired", "hyperarousal", "body_exhausted_mind_alert", "wired_fatigue"],
+    "category": "combined",
+    "triggers": ["irregular_sleep_schedule", "overtraining", "late_caffeine", "blue_light"],
+    "prevalence": 20,
+    "warningSigns": ["chronic_fatigue", "adrenal_exhaustion", "caffeine_dependency"],
+    "immediateAction": "Try progressive muscle relaxation followed by NSDR/yoga nidra to bridge mind-body disconnect.",
+    "color": "#ec4899",
+    "icon": "zap",
+    "priority": 3
+  },
+  {
+    "name": "Bedtime Anticipatory Anxiety",
+    "slug": "bedtime_anxiety",
+    "description": "Fear or dread about not being able to sleep, creating a self-fulfilling prophecy of sleeplessness.",
+    "symptoms": ["bedtime_dread", "anticipatory_anxiety", "fear_of_sleeplessness", "sleep_pressure"],
+    "category": "onset",
+    "triggers": ["past_insomnia", "fear_of_not_sleeping", "performance_anxiety"],
+    "prevalence": 15,
+    "warningSigns": ["panic_nighttime", "breathing_difficulty", "hours_awake_four_wall"],
+    "immediateAction": "Practice non-striving: accept that sleep may come gradually. Try chamomile tea and body scan meditation.",
+    "color": "#f59e0b",
+    "icon": "alert-circle",
+    "priority": 4
+  },
+  {
+    "name": "Body Tension Dominant Sleeplessness",
+    "slug": "body_tension",
+    "description": "Physical tension, restlessness, or somatic anxiety preventing sleep onset.",
+    "symptoms": ["physical_tension", "body_anxiety", "cant_relax_body", "restless_legs"],
+    "category": "onset",
+    "triggers": ["anxiety", "chronic_pain", "medication_side_effect", "temperature"],
+    "prevalence": 15,
+    "warningSigns": ["restless_leg_syndrome", "chronic_pain", "medication_tremor"],
+    "immediateAction": "Try progressive muscle relaxation combined with magnesium glycinate.",
+    "color": "#14b8a6",
+    "icon": "activity",
+    "priority": 5
+  }
+]
