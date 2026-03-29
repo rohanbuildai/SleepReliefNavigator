@@ -4,19 +4,15 @@ const generatedPlanSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    index: true,
+    // Not required - anonymous users can take quiz
   },
   quizSessionId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'QuizSession',
     required: true,
   },
-  // Profile classification
-  profile: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'SleepProfile',
-  },
+  // Profile classification - store as slug for flexibility
+  profile: String, // Store slug directly, not ObjectId reference
   profileSlug: String,
   profileName: String,
   confidence: Number,
@@ -25,10 +21,6 @@ const generatedPlanSchema = new mongoose.Schema({
   tonightPlan: {
     primarySteps: [{
       order: Number,
-      intervention: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Intervention',
-      },
       interventionSlug: String,
       interventionName: String,
       instructions: String,
@@ -36,10 +28,6 @@ const generatedPlanSchema = new mongoose.Schema({
       timing: String, // "now", "in 10 min", etc.
     }],
     backupPlan: [{
-      intervention: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Intervention',
-      },
       interventionSlug: String,
       interventionName: String,
       instructions: String,
@@ -49,17 +37,23 @@ const generatedPlanSchema = new mongoose.Schema({
     }],
     explanation: String,
     safetyNote: String,
-    grogginessRisk: Number,
-    dependencyRisk: Number,
+    grogginessRisk: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: 0,
+    },
+    dependencyRisk: {
+      type: Number,
+      min: 0,
+      max: 10,
+      default: 0,
+    },
   },
   
   // Tomorrow's reset plan
   tomorrowReset: {
     steps: [{
-      intervention: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Intervention',
-      },
       interventionSlug: String,
       interventionName: String,
       instructions: String,
@@ -73,10 +67,6 @@ const generatedPlanSchema = new mongoose.Schema({
       night: Number, // 1-7
       focus: String,
       interventions: [{
-        intervention: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Intervention',
-        },
         interventionSlug: String,
         interventionName: String,
         instructions: String,

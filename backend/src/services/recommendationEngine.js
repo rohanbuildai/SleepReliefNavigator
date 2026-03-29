@@ -228,11 +228,10 @@ const buildTonightPlan = (rankedInterventions, profileSlug, responses, safetyFla
   primary.forEach((intervention, index) => {
     primarySteps.push({
       order: index + 1,
-      intervention: intervention._id,
       interventionSlug: intervention.slug,
       interventionName: intervention.name,
       instructions: intervention.quickProtocol || intervention.instructions,
-      duration: intervention.onsetMinutes,
+      duration: intervention.onsetMinutes || 0,
       timing: index === 0 ? 'now' : `after step ${index}`,
     });
   });
@@ -242,7 +241,6 @@ const buildTonightPlan = (rankedInterventions, profileSlug, responses, safetyFla
   
   backup.forEach(intervention => {
     backupPlan.push({
-      intervention: intervention._id,
       interventionSlug: intervention.slug,
       interventionName: intervention.name,
       instructions: intervention.quickProtocol || intervention.instructions,
@@ -265,16 +263,20 @@ const buildTonightPlan = (rankedInterventions, profileSlug, responses, safetyFla
     avoidTonight.push('Blue light screens 1 hour before bed');
   }
   
-  // Calculate overall risk
-  const avgGrogginessRisk = primary.reduce((sum, i) => sum + i.grogginessRisk, 0) / primary.length;
-  const avgDependencyRisk = primary.reduce((sum, i) => sum + i.dependencyRisk, 0) / primary.length;
+  // Calculate overall risk (handle empty arrays)
+  const avgGrogginessRisk = primary.length > 0 
+    ? primary.reduce((sum, i) => sum + (i.grogginessRisk || 0), 0) / primary.length 
+    : 0;
+  const avgDependencyRisk = primary.length > 0 
+    ? primary.reduce((sum, i) => sum + (i.dependencyRisk || 0), 0) / primary.length 
+    : 0;
   
   return {
     primarySteps,
     backupPlan,
     avoidTonight,
-    grogginessRisk: Math.round(avgGrogginessRisk),
-    dependencyRisk: Math.round(avgDependencyRisk),
+    grogginessRisk: Math.round(avgGrogginessRisk * 10) / 10,
+    dependencyRisk: Math.round(avgDependencyRisk * 10) / 10,
   };
 };
 
@@ -291,7 +293,6 @@ const buildTomorrowReset = (rankedInterventions, profileSlug) => {
   
   routineInterventions.forEach((intervention, index) => {
     steps.push({
-      intervention: intervention._id,
       interventionSlug: intervention.slug,
       interventionName: intervention.name,
       instructions: intervention.instructions,
@@ -328,7 +329,6 @@ const buildSevenNightPlan = (rankedInterventions, profileSlug, isPremium = false
       night,
       focus,
       interventions: nightInterventions.map(i => ({
-        intervention: i._id,
         interventionSlug: i.slug,
         interventionName: i.name,
         instructions: i.instructions,

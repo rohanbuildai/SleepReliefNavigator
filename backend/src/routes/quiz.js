@@ -100,9 +100,9 @@ router.post('/complete', quizLimiter, quizCompleteValidation, asyncHandler(async
   // Generate recommendations
   const recommendations = await generateRecommendations(allResponses, safetyFlags || []);
   
-  // Create generated plan
-  const plan = await GeneratedPlan.create({
-    userId: req.userId,
+  // Create generated plan (userId is optional for anonymous users)
+  const planData = {
+    userId: req.userId || undefined, // Allow null/undefined for anonymous
     quizSessionId: session._id,
     profile: recommendations.profile.slug,
     profileSlug: recommendations.profile.slug,
@@ -112,15 +112,22 @@ router.post('/complete', quizLimiter, quizCompleteValidation, asyncHandler(async
     tomorrowReset: recommendations.tomorrowReset,
     sevenNightPlan: recommendations.sevenNightPlan,
     supplementSuggestions: recommendations.supplementSuggestions || [],
-    safetyFlagsTriggered: recommendations.safetyFlagsTriggered,
-    needsProfessionalHelp: recommendations.needsProfessionalHelp,
-    escalationNote: recommendations.escalationNote,
+    safetyFlagsTriggered: recommendations.safetyFlagsTriggered || [],
+    needsProfessionalHelp: recommendations.needsProfessionalHelp || false,
+    escalationNote: recommendations.escalationNote || '',
     metadata: {
       generatedAt: new Date(),
       engineVersion: '1.0.0',
       quizResponses: allResponses,
     },
+  };
+  
+  // Remove undefined fields to avoid Mongoose warnings
+  Object.keys(planData).forEach(key => {
+    if (planData[key] === undefined) delete planData[key];
   });
+  
+  const plan = await GeneratedPlan.create(planData);
   
   // Update quiz session
   session.status = 'completed';
