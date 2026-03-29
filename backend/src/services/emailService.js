@@ -4,6 +4,12 @@ const config = require('../config');
 // Create transporter based on configuration
 let transporter = null;
 
+console.log('[Email] Checking environment variables...');
+console.log('[Email] GMAIL_USER:', process.env.GMAIL_USER ? '***SET***' : 'NOT SET');
+console.log('[Email] GMAIL_PASS:', process.env.GMAIL_PASS ? '***SET***' : 'NOT SET');
+console.log('[Email] SMTP_HOST:', process.env.SMTP_HOST || 'NOT SET');
+console.log('[Email] SMTP_USER:', process.env.SMTP_USER || 'NOT SET');
+
 const initTransporter = () => {
   const smtpHost = process.env.SMTP_HOST;
   const smtpPort = process.env.SMTP_PORT;
