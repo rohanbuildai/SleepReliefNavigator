@@ -17,6 +17,10 @@ if (config.email?.apiKey && config.email.apiKey !== 're_your_resend_api_key' && 
 const FROM_EMAIL = config.email?.from || 'onboarding@resend.dev'; // Default to Resend test sender
 const FROM_NAME = config.email?.fromName || 'Sleep Relief Navigator';
 
+console.log('[Email] Config - API Key exists:', !!config.email?.apiKey);
+console.log('[Email] FROM_EMAIL:', FROM_EMAIL);
+console.log('[Email] FROM_NAME:', FROM_NAME);
+
 /**
  * Send welcome email to new users
  */
