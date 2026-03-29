@@ -41,7 +41,7 @@ const createCheckoutSession = async (userId, userEmail, priceKey, successUrl, ca
   
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
-    payment_method_types: ['card'],
+    payment_method_types: ['card', 'upi'], // UPI for India
     customer_email: userEmail,
     line_items: [
       {
@@ -76,7 +76,7 @@ const createSubscriptionCheckout = async (userId, userEmail, successUrl, cancelU
   
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
-    payment_method_types: ['card'],
+    payment_method_types: ['card', 'upi'], // UPI for India (subscriptions)
     customer_email: userEmail,
     line_items: [
       {
