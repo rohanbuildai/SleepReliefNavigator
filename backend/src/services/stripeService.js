@@ -13,8 +13,10 @@ const PRICING = {
       name: '7-Night Sleep Reset',
       description: 'A comprehensive 7-night sleep improvement program',
       priceId: config.stripe.priceOneTime,
-      amount: 2900, // $29.00
+      amount: 2900, // $29.00 USD
+      amountInr: 2399, // ₹2399 INR
       currency: 'usd',
+      currencyInr: 'inr',
     },
   },
   subscription: {
@@ -22,36 +24,59 @@ const PRICING = {
       name: 'Sleep Relief Premium Monthly',
       description: 'Full access to all features and personalized plans',
       priceId: config.stripe.priceSubscription,
-      amount: 990, // $9.99/month
+      amount: 990, // $9.99/month USD
+      amountInr: 799, // ₹799/month INR
       currency: 'usd',
+      currencyInr: 'inr',
       interval: 'month',
     },
   },
 };
 
 /**
+ * Get price configuration based on currency
+ */
+const getPriceConfig = (price, currency = 'usd') => {
+  const isInr = currency.toLowerCase() === 'inr';
+  return {
+    name: price.name,
+    description: price.description,
+    amount: isInr ? price.amountInr : price.amount,
+    currency: isInr ? price.currencyInr : price.currency,
+  };
+};
+
+/**
  * Create a Stripe Checkout Session for one-time purchase
  */
-const createCheckoutSession = async (userId, userEmail, priceKey, successUrl, cancelUrl) => {
+const createCheckoutSession = async (userId, userEmail, priceKey, successUrl, cancelUrl, currency = 'usd') => {
   const price = PRICING.oneTime[priceKey];
   
   if (!price) {
     throw new Error('Invalid price key');
   }
   
+  const priceConfig = getPriceConfig(price, currency);
+  
+  // UPI is only available for INR currency, cards work for all
+  const paymentMethods = currency.toLowerCase() === 'inr' 
+    ? ['card', 'upi'] 
+    : ['card'];
+  
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
-    payment_method_types: ['card', 'upi'], // UPI for India
+    payment_method_types: paymentMethods,
     customer_email: userEmail,
+    currency: priceConfig.currency,
     line_items: [
       {
         price_data: {
-          currency: price.currency,
+          currency: priceConfig.currency,
           product_data: {
-            name: price.name,
-            description: price.description,
+            name: priceConfig.name,
+            description: priceConfig.description,
           },
-          unit_amount: price.amount,
+          unit_amount: priceConfig.amount,
         },
         quantity: 1,
       },
@@ -61,8 +86,8 @@ const createCheckoutSession = async (userId, userEmail, priceKey, successUrl, ca
     metadata: {
       userId: userId.toString(),
       product: priceKey,
+      currency: currency,
     },
-    // Receipt email is handled automatically by Stripe for one-time payments
   });
   
   return session;
@@ -71,22 +96,29 @@ const createCheckoutSession = async (userId, userEmail, priceKey, successUrl, ca
 /**
  * Create a Stripe Checkout Session for subscription
  */
-const createSubscriptionCheckout = async (userId, userEmail, successUrl, cancelUrl) => {
+const createSubscriptionCheckout = async (userId, userEmail, successUrl, cancelUrl, currency = 'usd') => {
   const price = PRICING.subscription.monthly;
+  const priceConfig = getPriceConfig(price, currency);
+  
+  // UPI is only available for INR currency, cards work for all
+  const paymentMethods = currency.toLowerCase() === 'inr' 
+    ? ['card', 'upi'] 
+    : ['card'];
   
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
-    payment_method_types: ['card', 'upi'], // UPI for India (subscriptions)
+    payment_method_types: paymentMethods,
     customer_email: userEmail,
+    currency: priceConfig.currency,
     line_items: [
       {
         price_data: {
-          currency: price.currency,
+          currency: priceConfig.currency,
           product_data: {
-            name: price.name,
-            description: price.description,
+            name: priceConfig.name,
+            description: priceConfig.description,
           },
-          unit_amount: price.amount,
+          unit_amount: priceConfig.amount,
           recurring: {
             interval: price.interval,
           },
@@ -99,6 +131,7 @@ const createSubscriptionCheckout = async (userId, userEmail, successUrl, cancelU
     metadata: {
       userId: userId.toString(),
       product: 'monthly_subscription',
+      currency: currency,
     },
   });
   

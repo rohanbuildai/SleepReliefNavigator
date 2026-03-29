@@ -5,20 +5,25 @@ const Payment = require('../models/Payment');
 const User = require('../models/User');
 const config = require('../config');
 
-// Get pricing info
+// Get pricing info (with INR support)
 const getPricing = asyncHandler(async (req, res) => {
+  const currency = req.query.currency || 'usd';
+  
   res.json({
     success: true,
     data: {
       pricing: stripeService.PRICING,
-      currency: 'usd',
+      currency: currency,
+      currencySymbol: currency.toLowerCase() === 'inr' ? '₹' : '$',
+      supportedCurrencies: ['usd', 'inr'],
+      upiEnabled: currency.toLowerCase() === 'inr',
     },
   });
 });
 
 // Create checkout session for one-time purchase
 const createOneTimeCheckout = asyncHandler(async (req, res) => {
-  const { priceKey } = req.body;
+  const { priceKey, currency = 'usd' } = req.body;
   
   if (!priceKey) {
     return res.status(400).json({
@@ -32,7 +37,8 @@ const createOneTimeCheckout = asyncHandler(async (req, res) => {
     req.user.email,
     priceKey,
     `${config.frontendUrl}/dashboard/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
-    `${config.frontendUrl}/dashboard/billing?canceled=true`
+    `${config.frontendUrl}/dashboard/billing?canceled=true`,
+    currency
   );
   
   res.json({
@@ -40,17 +46,22 @@ const createOneTimeCheckout = asyncHandler(async (req, res) => {
     data: {
       sessionId: session.id,
       url: session.url,
+      currency: currency,
+      upiEnabled: currency.toLowerCase() === 'inr',
     },
   });
 });
 
 // Create subscription checkout
 const createSubscriptionCheckout = asyncHandler(async (req, res) => {
+  const { currency = 'usd' } = req.body;
+  
   const session = await stripeService.createSubscriptionCheckout(
     req.userId,
     req.user.email,
     `${config.frontendUrl}/dashboard/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
-    `${config.frontendUrl}/dashboard/billing?canceled=true`
+    `${config.frontendUrl}/dashboard/billing?canceled=true`,
+    currency
   );
   
   res.json({
@@ -58,6 +69,8 @@ const createSubscriptionCheckout = asyncHandler(async (req, res) => {
     data: {
       sessionId: session.id,
       url: session.url,
+      currency: currency,
+      upiEnabled: currency.toLowerCase() === 'inr',
     },
   });
 });

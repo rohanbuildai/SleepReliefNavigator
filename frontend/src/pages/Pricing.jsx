@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import api from '../api/client';
-import { Moon, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import { Moon, ArrowRight, Loader2, CheckCircle, Globe } from 'lucide-react';
 
 const Pricing = () => {
   const navigate = useNavigate();
@@ -12,13 +12,14 @@ const Pricing = () => {
   const { success, error } = useToast();
   const [loading, setLoading] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState(null);
+  const [currency, setCurrency] = useState('usd'); // 'usd' or 'inr'
 
   const plans = [
     {
       id: 'free',
       name: 'Free',
-      price: '$0',
-      period: 'forever',
+      prices: { usd: '$0', inr: '₹0' },
+      period: { usd: 'forever', inr: 'forever' },
       description: 'Get started with personalized sleep guidance',
       features: [
         { text: 'Sleep profile classification', included: true },
@@ -35,8 +36,8 @@ const Pricing = () => {
     {
       id: 'premium_monthly',
       name: 'Premium',
-      price: '$9.99',
-      period: '/month',
+      prices: { usd: '$9.99', inr: '₹799' },
+      period: { usd: '/month', inr: '/month' },
       description: 'Full access to accelerate your sleep improvement',
       features: [
         { text: 'Everything in Free', included: true },
@@ -54,8 +55,8 @@ const Pricing = () => {
     {
       id: 'one_time',
       name: '7-Night Reset',
-      price: '$29',
-      period: 'one-time',
+      prices: { usd: '$29', inr: '₹2,399' },
+      period: { usd: 'one-time', inr: 'one-time' },
       description: 'A comprehensive 7-night program to reset your sleep',
       features: [
         { text: 'Complete 7-night reset plan', included: true },
@@ -89,12 +90,16 @@ const Pricing = () => {
     try {
       let response;
       if (planId === 'premium_monthly') {
-        response = await api.post('/billing/subscribe');
+        response = await api.post('/billing/subscribe', { currency });
       } else if (planId === 'one_time') {
-        response = await api.post('/billing/checkout', { priceKey: '7night_reset' });
+        response = await api.post('/billing/checkout', { priceKey: '7night_reset', currency });
       }
 
       if (response?.data?.data?.url) {
+        // Show UPI notice if enabled
+        if (response.data.data.upiEnabled) {
+          success('You can pay with UPI, Card, or other methods on the next page');
+        }
         window.location.href = response.data.data.url;
       }
     } catch (err) {
@@ -110,9 +115,32 @@ const Pricing = () => {
     <div className="min-h-screen bg-night-950 text-white">
       {/* Header */}
       <div className="border-b border-night-800">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-center gap-2">
-          <Moon className="w-6 h-6 text-brand-400" />
-          <span className="font-bold text-lg">Sleep Relief Navigator</span>
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Moon className="w-6 h-6 text-brand-400" />
+            <span className="font-bold text-lg">Sleep Relief Navigator</span>
+          </div>
+          
+          {/* Currency Selector */}
+          <div className="flex items-center gap-2 bg-night-800 rounded-lg p-1">
+            <Globe className="w-4 h-4 text-night-400" />
+            <button
+              onClick={() => setCurrency('usd')}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                currency === 'usd' ? 'bg-brand-600 text-white' : 'text-night-400 hover:text-white'
+              }`}
+            >
+              USD ($)
+            </button>
+            <button
+              onClick={() => setCurrency('inr')}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                currency === 'inr' ? 'bg-brand-600 text-white' : 'text-night-400 hover:text-white'
+              }`}
+            >
+              INR (₹)
+            </button>
+          </div>
         </div>
       </div>
 
@@ -126,6 +154,12 @@ const Pricing = () => {
             Choose the plan that fits your sleep improvement journey. 
             Start free, upgrade when you're ready.
           </p>
+          {currency === 'inr' && (
+            <p className="mt-4 text-brand-400 text-sm flex items-center justify-center gap-2">
+              <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full">UPI Available</span>
+              Pay with Google Pay, PhonePe, Paytm, or any UPI app
+            </p>
+          )}
         </div>
 
         {/* Pricing cards */}
@@ -153,8 +187,8 @@ const Pricing = () => {
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-night-400">{plan.period}</span>
+                  <span className="text-4xl font-bold">{plan.prices[currency]}</span>
+                  <span className="text-night-400">{plan.period[currency]}</span>
                 </div>
                 <p className="text-sm text-night-400 mt-2">{plan.description}</p>
               </div>
