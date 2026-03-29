@@ -43,7 +43,7 @@ module.exports = {
   // Email
   email: {
     apiKey: process.env.RESEND_API_KEY,
-    from: process.env.EMAIL_FROM || 'noreply@sleepreliefnavigator.com',
+    from: process.env.EMAIL_FROM || 'onboarding@resend.dev', // Default to Resend test sender
     fromName: process.env.EMAIL_FROM_NAME || 'Sleep Relief Navigator',
   },
   
