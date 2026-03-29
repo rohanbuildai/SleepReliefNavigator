@@ -62,10 +62,7 @@ const createCheckoutSession = async (userId, userEmail, priceKey, successUrl, ca
       userId: userId.toString(),
       product: priceKey,
     },
-    // Enable automatic receipt
-    receipt_email: userEmail,
-    // Shipping address not required for digital product
-    shipping_address_collection: undefined,
+    // Receipt email is handled automatically by Stripe for one-time payments
   });
   
   return session;
@@ -103,7 +100,6 @@ const createSubscriptionCheckout = async (userId, userEmail, successUrl, cancelU
       userId: userId.toString(),
       product: 'monthly_subscription',
     },
-    receipt_email: userEmail,
   });
   
   return session;
