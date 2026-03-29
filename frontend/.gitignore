@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Testing
+coverage/
+
+# Temp
+tmp/
+temp/
+*.tmp
