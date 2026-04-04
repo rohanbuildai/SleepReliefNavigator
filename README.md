@@ -80,48 +80,6 @@ Frontend runs on http://localhost:5173
 
 ## 🔑 Environment Variables
 
-### Backend (.env)
-
-```env
-# Server
-NODE_ENV=development
-PORT=5000
-
-# Database
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/sleeprelief
-
-# Auth (REQUIRED - Generate strong secrets)
-JWT_SECRET=your-256-bit-secret
-JWT_REFRESH_SECRET=your-256-bit-refresh-secret
-
-# Stripe
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-STRIPE_PRICE_ONE_TIME=price_xxx
-STRIPE_PRICE_SUBSCRIPTION=price_xxx
-
-# Email (Resend)
-RESEND_API_KEY=re_xxx
-EMAIL_FROM=noreply@yoursite.com
-
-# Upstash Redis (optional, for rate limiting)
-UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
-UPSTASH_REDIS_REST_TOKEN=xxx
-
-# URLs
-FRONTEND_URL=http://localhost:5173
-
-# Security
-ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
-```
-
-### Frontend (.env)
-
-```env
-VITE_API_URL=http://localhost:5000/api/v1
-VITE_STRIPE_PUBLIC_KEY=pk_test_xxx
-```
-
 ## 📦 Available Scripts
 
 ### Backend
